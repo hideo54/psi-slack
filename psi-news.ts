@@ -94,10 +94,12 @@ export default async ({ webClient }: { webClient: WebClient }) => {
         ];
         await webClient.chat.postMessage({
             channel: slackRandomChannel,
+            icon_emoji: ':mega:',
+            username: '学科からのお知らせ',
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
             blocks,
         });
     }
     readUrls.push(...news.map(notice => notice.url));
-    await fs.writeFile('cahce/readUrls.json', JSON.stringify(readUrls));
+    await fs.writeFile('cache/readUrls.json', JSON.stringify(readUrls));
 };
