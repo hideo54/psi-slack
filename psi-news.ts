@@ -9,6 +9,7 @@ const auth = {
     username: process.env.USERNAME!,
     password: process.env.PASSWORD!,
 };
+const slackRandomChannel = process.env.SLACK_RANDOM_CHANNEL!;
 
 interface Notice {
     date: string;
@@ -92,7 +93,7 @@ export default async ({ webClient }: { webClient: WebClient }) => {
             },
         ];
         await webClient.chat.postMessage({
-            channel: '',
+            channel: slackRandomChannel,
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
             blocks,
         });
