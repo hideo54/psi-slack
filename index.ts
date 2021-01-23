@@ -1,8 +1,13 @@
+import { WebClient } from '@slack/web-api';
+import schedule from 'node-schedule';
 import dotenv from 'dotenv';
 dotenv.config();
-import { getUnreadNews, auth } from './psi-news';
+import psiNews from './psi-news';
 
-(async () => {
-    const news = await getUnreadNews([]);
-    console.log(news);
-})();
+const slackToken = process.env.SLACK_TOKEN!;
+
+const webClient = new WebClient(slackToken);
+
+schedule.scheduleJob('*/10 * * * *', () => {
+    psiNews({ webClient });
+})
