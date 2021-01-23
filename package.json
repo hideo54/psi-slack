@@ -1,0 +1,25 @@
+{
+  "name": "psi-slack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "develop": "nodemon index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hideo54/psi-slack.git"
+  },
+  "author": "hideo54",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hideo54/psi-slack/issues"
+  },
+  "homepage": "https://github.com/hideo54/psi-slack#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.7",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  }
+}
