@@ -23,7 +23,7 @@ const getNewsBodyForSlack = async (pageUrl: string) => {
     const res = await axios.get(pageUrl, { auth });
     const html = res.data;
     const $ = cheerio.load(html);
-    const bodyForSlack = slackify($('div#newsbody').html()!)
+    const bodyForSlack = slackify($('div#newsbody').html()!).trim();
     return bodyForSlack;
 };
 

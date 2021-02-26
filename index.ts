@@ -8,6 +8,6 @@ const slackToken = process.env.SLACK_TOKEN!;
 
 const webClient = new WebClient(slackToken);
 
-schedule.scheduleJob('*/10 * * * *', () => {
+schedule.scheduleJob('0 * * * *', () => {
     psiNews({ webClient });
-})
+});
