@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import axios from 'axios';
 import cheerio from 'cheerio';
 import slackify from 'slackify-html';
-import { WebClient } from '@slack/web-api';
+import { WebClient, WebAPICallResult } from '@slack/web-api';
 
 const newsPageUrl = 'https://www.si.t.u-tokyo.ac.jp/student/news/';
 const auth = {
@@ -61,7 +61,7 @@ export default async ({ webClient }: { webClient: WebClient }) => {
     const news = await getUnreadNews(readUrls);
     news.reverse();
     for (const notice of news) {
-        const blocks = [
+        const headBlocks = [
             {
                 type: 'section',
                 text: {
@@ -84,6 +84,8 @@ export default async ({ webClient }: { webClient: WebClient }) => {
                     text: `*<${notice.url}|${notice.title}>*`,
                 },
             },
+        ];
+        const bodyBlocks = [
             {
                 type: 'section',
                 text: {
@@ -92,12 +94,23 @@ export default async ({ webClient }: { webClient: WebClient }) => {
                 },
             },
         ];
+        interface Result extends WebAPICallResult {
+            ts: string;
+        }
+        const { ts } = await webClient.chat.postMessage({
+            channel: slackRandomChannel,
+            icon_emoji: ':mega:',
+            username: '学科からのお知らせ',
+            text: `新しい「学科からのお知らせ」: *${notice.title}*`,
+            blocks: headBlocks,
+        }) as Result;
         await webClient.chat.postMessage({
             channel: slackRandomChannel,
             icon_emoji: ':mega:',
             username: '学科からのお知らせ',
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
-            blocks,
+            blocks: bodyBlocks,
+            thread_ts: ts,
         });
     }
     readUrls.push(...news.map(notice => notice.url));
