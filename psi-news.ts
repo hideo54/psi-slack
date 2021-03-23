@@ -41,7 +41,7 @@ export const getUnreadNews = async (readUrls: string[]) => {
         new Object(e) as NoticeExcerpt
     );
     const unreadNoticeExcerptsForPSI = noticeExcerpts.filter(excerpt =>
-        ['共通', 'PSI'].includes(excerpt.category) && !readUrls.includes(excerpt.url)
+        ['共通', 'PSI', '未分類'].includes(excerpt.category) && !readUrls.includes(excerpt.url)
     );
     const unreadNotices: Notice[] = [];
     for (const excerpt of unreadNoticeExcerptsForPSI) {
