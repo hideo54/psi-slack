@@ -28,7 +28,7 @@ const getNewsBodyForSlack = async (pageUrl: string) => {
 };
 
 export const getUnreadNews = async (readUrls: string[]) => {
-    const res = await axios.get(newsPageUrl, { auth});
+    const res = await axios.get(newsPageUrl, { auth });
     const html = res.data;
     const $ = cheerio.load(html);
     type NoticeExcerpt = Omit<Notice, 'bodyForSlack'>;
@@ -54,7 +54,7 @@ export const getUnreadNews = async (readUrls: string[]) => {
     return unreadNotices;
 };
 
-export default async ({ webClient }: { webClient: WebClient }) => {
+const main = async ({ webClient }: { webClient: WebClient }) => {
     const readUrls = JSON.parse(
         await fs.readFile('cache/readUrls.json', 'utf-8')
     ) as string[];
@@ -116,3 +116,5 @@ export default async ({ webClient }: { webClient: WebClient }) => {
     readUrls.push(...news.map(notice => notice.url));
     await fs.writeFile('cache/readUrls.json', JSON.stringify(readUrls));
 };
+
+export default main;
