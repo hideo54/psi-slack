@@ -136,14 +136,14 @@ const main = async ({ webClient }: SlackClients) => {
             ts: string;
         }
         const { ts } = await webClient.chat.postMessage({
-            channel: channelIds.random,
+            channel: channelIds.facultyNews,
             icon_emoji: ':mega:',
             username: '工学部新着情報',
             text: '工学部ポータルサイトの「新着情報」が更新されました。',
             blocks: headBlocks,
         }) as Result;
         await webClient.chat.postMessage({
-            channel: channelIds.random,
+            channel: channelIds.facultyNews,
             icon_emoji: ':mega:',
             username: '工学部新着情報',
             text: '工学部ポータルサイトの「新着情報」が更新されました。',

@@ -8,5 +8,6 @@ export interface SlackClients {
 
 export const channelIds = {
     random: process.env.SLACK_RANDOM_CHANNEL!,
+    facultyNews: process.env.SLACK_FACULTY_NEWS_CHANNEL!,
     hideo54: process.env.SLACK_HIDEO54_USERID!,
 };
