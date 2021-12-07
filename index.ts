@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import psiNews from './psi-news';
+import facultyNews from './faculty-news';
 import channelNotifier from './channel-notifier';
 
 const slackToken = process.env.SLACK_TOKEN!;
@@ -18,6 +19,7 @@ const slackEvents = createEventAdapter(slackSigningSecret);
 
 const clients: SlackClients = { webClient, slackEvents };
 
+facultyNews(clients);
 schedule.scheduleJob('0 * * * *', () => {
     psiNews(clients);
 });
