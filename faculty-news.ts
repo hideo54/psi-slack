@@ -151,8 +151,8 @@ const main = async ({ webClient }: SlackClients) => {
             thread_ts: ts,
         });
     }
-    readArticleUrls.push(...news.articles.map(article => article.url));
-    await fs.writeFile('cache/readFacultyArticleUrls.json', JSON.stringify(readArticleUrls));
+    const articleUrls = news.articles.map(article => article.url);
+    await fs.writeFile('cache/readFacultyArticleUrls.json', JSON.stringify(articleUrls));
 };
 
 export default main;
