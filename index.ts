@@ -14,7 +14,7 @@ const slackSigningSecret = process.env.SLACK_SIGNING_SECRET!;
 const webClient = new WebClient(slackToken);
 const slackEvents = createEventAdapter(slackSigningSecret);
 
-slackEvents.start(3000);
+// slackEvents.start(3000);
 
 const clients: SlackClients = { webClient, slackEvents };
 
@@ -22,4 +22,4 @@ schedule.scheduleJob('0 * * * *', () => {
     psiNews(clients);
 });
 
-channelNotifier(clients);
+// channelNotifier(clients);
