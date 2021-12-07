@@ -2,14 +2,14 @@ import fs from 'fs/promises';
 import axios from 'axios';
 import cheerio from 'cheerio';
 import slackify from 'slackify-html';
-import { WebClient, WebAPICallResult } from '@slack/web-api';
+import type { WebAPICallResult } from '@slack/web-api';
+import { SlackClients, channelIds } from './lib/slack';
 
 const newsPageUrl = 'https://www.si.t.u-tokyo.ac.jp/student/news/';
 const auth = {
     username: process.env.USERNAME!,
     password: process.env.PASSWORD!,
 };
-const slackRandomChannel = process.env.SLACK_RANDOM_CHANNEL!;
 
 interface Notice {
     date: string;
@@ -54,7 +54,7 @@ export const getUnreadNews = async (readUrls: string[]) => {
     return unreadNotices;
 };
 
-const main = async ({ webClient }: { webClient: WebClient }) => {
+const main = async ({ webClient }: SlackClients) => {
     const readUrls = JSON.parse(
         await fs.readFile('cache/readUrls.json', 'utf-8')
     ) as string[];
@@ -98,14 +98,15 @@ const main = async ({ webClient }: { webClient: WebClient }) => {
             ts: string;
         }
         const { ts } = await webClient.chat.postMessage({
-            channel: slackRandomChannel,
+            channel: channelIds.random,
             icon_emoji: ':mega:',
             username: '学科からのお知らせ',
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
             blocks: headBlocks,
         }) as Result;
         await webClient.chat.postMessage({
-            channel: slackRandomChannel,
+            channel: channelIds.random,
+            as_user: false,
             icon_emoji: ':mega:',
             username: '学科からのお知らせ',
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
