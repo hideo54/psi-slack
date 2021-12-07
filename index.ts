@@ -19,9 +19,9 @@ const slackEvents = createEventAdapter(slackSigningSecret);
 
 const clients: SlackClients = { webClient, slackEvents };
 
-facultyNews(clients);
 schedule.scheduleJob('0 * * * *', () => {
     psiNews(clients);
+    facultyNews(clients);
 });
 
 // channelNotifier(clients);
