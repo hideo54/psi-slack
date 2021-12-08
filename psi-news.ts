@@ -7,8 +7,8 @@ import { SlackClients, channelIds } from './lib/slack';
 
 const newsPageUrl = 'https://www.si.t.u-tokyo.ac.jp/student/news/';
 const auth = {
-    username: process.env.USERNAME!,
-    password: process.env.PASSWORD!,
+    username: process.env.PSI_COMMON_USERNAME!,
+    password: process.env.PSI_COMMON_PASSWORD!,
 };
 
 interface Notice {
