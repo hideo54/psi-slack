@@ -98,7 +98,7 @@ const main = async ({ webClient }: SlackClients) => {
                 type: 'context',
                 elements: [{
                     type: 'mrkdwn',
-                    text: '閲覧にはプロキシ設定が必要です。',
+                    text: '学外での閲覧にはプロキシ設定が必要です。',
                 }],
             },
             { type: 'divider' },
