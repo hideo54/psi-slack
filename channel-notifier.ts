@@ -1,7 +1,7 @@
 import { SlackClients, channelIds } from './lib/slack';
 
 const main = ({ webClient, slackEvents }: SlackClients) => {
-    slackEvents.on('channel_created', event => {
+    const notify = (event: any) => {
         const { id, creator } = event.channel;
         webClient.chat.postMessage({
             channel: channelIds.random,
@@ -10,7 +10,9 @@ const main = ({ webClient, slackEvents }: SlackClients) => {
             username: '学科からのお知らせ',
             text: `<@${creator}>が新しいチャンネル <#${id}> を作成しました :+1:`,
         });
-    });
+    };
+    slackEvents.on('channel_created', notify);
+    slackEvents.on('channel_unarchive', notify);
 };
 
 export default main;
