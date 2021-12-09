@@ -7,7 +7,7 @@ const main = ({ webClient, slackEvents }: SlackClients) => {
             channel: channelIds.random,
             as_user: false,
             icon_emoji: ':mega:',
-            username: '学科からのお知らせ',
+            username: 'チャンネルお知らせ',
             text: `<@${creator}>が新しいチャンネル <#${id}> を作成しました :+1:`,
         });
     };
