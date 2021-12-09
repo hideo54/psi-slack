@@ -84,7 +84,7 @@ const main = async ({ webClient }: SlackClients) => {
     unreadArticles.reverse();
     for (const article of unreadArticles) {
         const html = await getHtml(article.url);
-        const htmlWithUrlReplaced = html.replace(/href="\/(.+)"/, `href="${host}/$1"`);
+        const htmlWithUrlReplaced = html.replace(/href="\/(.+?)"/gi, `href="${host}/$1"`);
         const bodyForSlack = slackify(cheerio.load(htmlWithUrlReplaced)('pre').html()!).trim();
         const headBlocks = [
             {
