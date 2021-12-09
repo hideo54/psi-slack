@@ -13,3 +13,12 @@ PSI 生からの pull request は積極的に受け付けます!
 ### faculty-news
 
 工学部ポータルサイトのお知らせの更新を取得し投稿します。
+
+### channel-notifier
+
+新しいチャンネルが作成されたり、チャンネルが unarchive されたりした時に投稿します。
+
+## setup
+
+* `cp sample.env .env` + よしなに
+* 構成は Manifest 参照。

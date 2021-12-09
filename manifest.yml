@@ -1,0 +1,25 @@
+_metadata:
+  major_version: 1
+  minor_version: 1
+display_information:
+  name: PSI 21 bot
+  description: PSI bot for general use.
+  background_color: "#ce000e"
+features:
+  bot_user:
+    display_name: PSI 21 bot
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - chat:write
+      - channels:read
+settings:
+  event_subscriptions:
+    request_url: https://ayumu.hideo54.com/slack/events
+    bot_events:
+      - channel_created
+      - channel_unarchive
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
