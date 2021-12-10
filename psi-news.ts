@@ -106,7 +106,6 @@ const main = async ({ webClient }: SlackClients) => {
         }) as Result;
         await webClient.chat.postMessage({
             channel: channelIds.random,
-            as_user: false,
             icon_emoji: ':mega:',
             username: '学科からのお知らせ',
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
