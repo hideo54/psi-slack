@@ -75,6 +75,20 @@ const retrieveNews = async () => {
     return news;
 };
 
+const textToSlackBlocks = (text: string) => {
+    const blocks = [];
+    for (let i = 0; i < Math.ceil(text.length / 3000); i++) {
+        blocks.push({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: text.slice(3000 * i, 3000 * (i+1)),
+            },
+        });
+    }
+    return blocks;
+};
+
 const main = async ({ webClient }: SlackClients) => {
     const readArticleUrls = JSON.parse(
         await fs.readFile('cache/readFacultyArticleUrls.json', 'utf-8')
@@ -123,15 +137,7 @@ const main = async ({ webClient }: SlackClients) => {
                 ],
             },
         ];
-        const bodyBlocks = [
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: bodyForSlack,
-                },
-            },
-        ];
+        const bodyBlocks = textToSlackBlocks(bodyForSlack);
         interface Result extends WebAPICallResult {
             ts: string;
         }
@@ -142,14 +148,24 @@ const main = async ({ webClient }: SlackClients) => {
             text: '工学部ポータルサイトの「新着情報」が更新されました。',
             blocks: headBlocks,
         }) as Result;
-        await webClient.chat.postMessage({
-            channel: channelIds.facultyNews,
-            icon_emoji: ':mega:',
-            username: '工学部新着情報',
-            text: '工学部ポータルサイトの「新着情報」が更新されました。',
-            blocks: bodyBlocks,
-            thread_ts: ts,
-        });
+        try {
+            await webClient.chat.postMessage({
+                channel: channelIds.facultyNews,
+                icon_emoji: ':mega:',
+                username: '工学部新着情報',
+                text: '工学部ポータルサイトの「新着情報」が更新されました。',
+                blocks: bodyBlocks,
+                thread_ts: ts,
+            });
+        } catch (e) {
+            await webClient.chat.postMessage({
+                channel: channelIds.facultyNews,
+                icon_emoji: ':mega:',
+                username: '工学部新着情報',
+                text: `エラー:cry:\n${e}`,
+                thread_ts: ts,
+            });
+        }
     }
     const articleUrls = news.articles.map(article => article.url);
     await fs.writeFile('cache/readFacultyArticleUrls.json', JSON.stringify(articleUrls));
