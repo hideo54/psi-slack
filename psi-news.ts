@@ -54,6 +54,20 @@ export const getUnreadNews = async (readUrls: string[]) => {
     return unreadNotices;
 };
 
+const textToSlackBlocks = (text: string) => {
+    const blocks = [];
+    for (let i = 0; i < Math.ceil(text.length / 3000); i++) {
+        blocks.push({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: text.slice(3000 * i, 3000 * (i+1)),
+            },
+        });
+    }
+    return blocks;
+};
+
 const main = async ({ webClient }: SlackClients) => {
     const readUrls = JSON.parse(
         await fs.readFile('cache/readUrls.json', 'utf-8')
@@ -85,15 +99,7 @@ const main = async ({ webClient }: SlackClients) => {
                 },
             },
         ];
-        const bodyBlocks = [
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: notice.bodyForSlack,
-                },
-            },
-        ];
+        const bodyBlocks = textToSlackBlocks(notice.bodyForSlack);
         interface Result extends WebAPICallResult {
             ts: string;
         }
@@ -104,14 +110,25 @@ const main = async ({ webClient }: SlackClients) => {
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
             blocks: headBlocks,
         }) as Result;
-        await webClient.chat.postMessage({
-            channel: channelIds.random,
-            icon_emoji: ':mega:',
-            username: '学科からのお知らせ',
-            text: `新しい「学科からのお知らせ」: *${notice.title}*`,
-            blocks: bodyBlocks,
-            thread_ts: ts,
-        });
+        try {
+            await webClient.chat.postMessage({
+                channel: channelIds.random,
+                icon_emoji: ':mega:',
+                username: '学科からのお知らせ',
+                text: `新しい「学科からのお知らせ」: *${notice.title}*`,
+                blocks: bodyBlocks,
+                thread_ts: ts,
+            });
+        } catch (e) {
+            await webClient.chat.postMessage({
+                channel: channelIds.random,
+                icon_emoji: ':mega:',
+                username: '学科からのお知らせ',
+                text: `新しい「学科からのお知らせ」: *${notice.title}*`,
+                blocks: bodyBlocks,
+                thread_ts: ts,
+            });
+        }
     }
     readUrls.push(...news.map(notice => notice.url));
     await fs.writeFile('cache/readUrls.json', JSON.stringify(readUrls));
