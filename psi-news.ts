@@ -124,8 +124,7 @@ const main = async ({ webClient }: SlackClients) => {
                 channel: channelIds.random,
                 icon_emoji: ':mega:',
                 username: '学科からのお知らせ',
-                text: `新しい「学科からのお知らせ」: *${notice.title}*`,
-                blocks: bodyBlocks,
+                text: `エラー:cry:\n${e}`,
                 thread_ts: ts,
             });
         }
