@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { WebClient } from '@slack/web-api';
 import { createEventAdapter } from '@slack/events-api';
 import schedule from 'node-schedule';
