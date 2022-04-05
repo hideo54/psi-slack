@@ -133,6 +133,7 @@ const func = async ({ channel }: { channel: string; }) => {
     readUrls.push(...news.map(notice => notice.url));
     // TODO: write readUrls to cache
     await db.ref('psi-slack').child('psi-news-read-urls').set(readUrls);
+    return;
 };
 
 export default func;
