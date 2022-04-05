@@ -31,10 +31,6 @@ const func = ({ channel }: { channel: string; }) => {
             text: `<@${user}>がチャンネル <#${channel}> を復元しました :+1:`,
         });
     });
-    // For confirmation of successful event receiving
-    app.event('reaction_added', async ({ event }) => {
-        console.log(event);
-    });
     return receiver.app;
 };
 
