@@ -3,7 +3,6 @@ import { App, ExpressReceiver } from '@slack/bolt';
 const receiver = new ExpressReceiver({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     signingSecret: process.env.SLACK_SIGNING_SECRET!,
-    endpoints: '/events',
     processBeforeResponse: true,
 });
 
