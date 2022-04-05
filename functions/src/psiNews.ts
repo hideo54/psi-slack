@@ -1,18 +1,7 @@
-import { App } from '@slack/bolt';
-import admin from 'firebase-admin'; // Default import required
-import { getFirestore } from 'firebase-admin/firestore';
 import axios from 'axios';
 import cheerio from 'cheerio';
 import slackify from 'slackify-html';
-
-const app = new App({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    token: process.env.SLACK_TOKEN!,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    signingSecret: process.env.SLACK_SIGNING_SECRET!,
-});
-
-admin.initializeApp();
+import type { HourlyJobFunction } from './interfaces';
 
 const newsPageUrl = 'https://www.si.t.u-tokyo.ac.jp/student/news/';
 const auth = {
@@ -80,11 +69,11 @@ const textToSlackBlocks = (text: string) => {
     return blocks;
 };
 
-const func = async ({ channel }: { channel: string; }) => {
-    const db = getFirestore();
+const func = async ({ slackApp, firestoreDb, channel }: HourlyJobFunction) => {
     const readUrls = (
-        await db.collection('psi-slack').doc('psi-news-read-urls').get()
+        await firestoreDb.collection('psi-slack').doc('psi-news-read-urls').get()
     ).data() as string[];
+    console.log(readUrls);
     const news = await getUnreadNews(readUrls);
     news.reverse();
     for (const notice of news) {
@@ -113,14 +102,14 @@ const func = async ({ channel }: { channel: string; }) => {
             },
         ];
         const bodyBlocks = textToSlackBlocks(notice.bodyForSlack);
-        const { ts } = await app.client.chat.postMessage({
+        const { ts } = await slackApp.client.chat.postMessage({
             channel,
             icon_emoji: ':mega:',
             username: '学科からのお知らせ',
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
             blocks: headBlocks,
         });
-        await app.client.chat.postMessage(
+        await slackApp.client.chat.postMessage(
             {
                 channel,
                 icon_emoji: ':mega:',
@@ -132,7 +121,7 @@ const func = async ({ channel }: { channel: string; }) => {
         );
     }
     readUrls.push(...news.map(notice => notice.url));
-    await db.collection('psi-slack').doc('psi-news-read-urls').set(readUrls);
+    await firestoreDb.collection('psi-slack').doc('psi-news-read-urls').set(readUrls);
     return;
 };
 

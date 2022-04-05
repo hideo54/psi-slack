@@ -1,7 +1,11 @@
 import * as functions from 'firebase-functions';
+import admin from 'firebase-admin'; // Default import required
+import { getFirestore } from 'firebase-admin/firestore';
+import { App } from '@slack/bolt';
 import dotenv from 'dotenv';
 dotenv.config();
 import psiNews from './psiNews';
+import facultyNews from './facultyNews';
 import channelNotifier from './channelNotifier';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -12,7 +16,17 @@ export const psiSlackHourlyJob = functions
     .pubsub.schedule('0 * * * *')
     .timeZone('Asia/Tokyo')
     .onRun(async () => {
-        await psiNews({ channel: botChannel });
+        const slackApp = new App({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            token: process.env.SLACK_TOKEN!,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            signingSecret: process.env.SLACK_SIGNING_SECRET!,
+        });
+        admin.initializeApp();
+        const firestoreDb = getFirestore();
+        const channel = botChannel;
+        await psiNews({ slackApp, firestoreDb, channel });
+        await facultyNews({ slackApp, firestoreDb, channel });
     });
 
 export const psiSlackEventsReceiver = functions
