@@ -9,7 +9,9 @@ import facultyNews from './facultyNews';
 import channelNotifier from './channelNotifier';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const botChannel = process.env.SLACK_BOT_CHANNEL!;
+const randomChannel = process.env.SLACK_RANDOM_CHANNEL!;
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const facultyNewsChannel = process.env.SLACK_FACULTY_NEWS_CHANNEL!;
 
 export const psiSlackHourlyJob = functions
     .region('asia-northeast1')
@@ -24,11 +26,10 @@ export const psiSlackHourlyJob = functions
         });
         admin.initializeApp();
         const firestoreDb = getFirestore();
-        const channel = botChannel;
-        await psiNews({ slackApp, firestoreDb, channel });
-        await facultyNews({ slackApp, firestoreDb, channel });
+        await psiNews({ slackApp, firestoreDb, channel: randomChannel });
+        await facultyNews({ slackApp, firestoreDb, channel: facultyNewsChannel });
     });
 
 export const psiSlackEventsReceiver = functions
     .region('asia-northeast1')
-    .https.onRequest(channelNotifier({ channel: botChannel }));
+    .https.onRequest(channelNotifier({ channel: randomChannel }));
