@@ -1,5 +1,5 @@
 import { App } from '@slack/bolt';
-import { initializeApp } from 'firebase-admin';
+import admin from 'firebase-admin'; // Default import required
 import { getFirestore } from 'firebase-admin/firestore';
 import axios from 'axios';
 import cheerio from 'cheerio';
@@ -12,7 +12,7 @@ const app = new App({
     signingSecret: process.env.SLACK_SIGNING_SECRET!,
 });
 
-initializeApp();
+admin.initializeApp();
 
 const newsPageUrl = 'https://www.si.t.u-tokyo.ac.jp/student/news/';
 const auth = {
