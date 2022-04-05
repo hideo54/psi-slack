@@ -23,7 +23,6 @@ const func = ({ channel }: { channel: string; }) => {
             text: `<@${creator}>が新しいチャンネル <#${id}> を作成しました :+1:`,
         });
     });
-
     app.event('channel_unarchive', async ({ event, client }) => {
         const { channel, user } = event;
         client.chat.postMessage({
@@ -32,6 +31,10 @@ const func = ({ channel }: { channel: string; }) => {
             username: 'チャンネルお知らせ',
             text: `<@${user}>がチャンネル <#${channel}> を復元しました :+1:`,
         });
+    });
+    // For confirmation of successful event receiving
+    app.event('reaction_added', async ({ event }) => {
+        console.log(event);
     });
     return receiver.app;
 };
