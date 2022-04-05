@@ -1,4 +1,6 @@
 import * as functions from 'firebase-functions';
+import dotenv from 'dotenv';
+dotenv.config();
 import psiNews from './psiNews';
 import channelNotifier from './channelNotifier';
 
