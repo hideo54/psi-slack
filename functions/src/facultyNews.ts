@@ -3,7 +3,7 @@ import iconv from 'iconv-lite';
 import { scrapeHTML } from 'scrape-it';
 import cheerio from 'cheerio';
 import slackify from 'slackify-html';
-import type { HourlyJobFunction } from './interfaces';
+import type { HourlyJobFunction, Cache } from './interfaces';
 
 const host = 'https://info.t.u-tokyo.ac.jp';
 
@@ -92,9 +92,10 @@ const textToSlackBlocks = (text: string) => {
 };
 
 const func = async ({ slackApp, firestoreDb, channel }: HourlyJobFunction) => {
-    const readArticleUrls = (
-        await firestoreDb.collection('psi-slack').doc('psi-news-read-urls').get()
-    ).data() as string[];
+    const cache = (
+        await firestoreDb.collection('psi-slack').doc('cache').get()
+    ).data() as Cache;
+    const readArticleUrls = cache.facultyNews;
     const news = await retrieveNews();
     const unreadArticles = news.articles.filter(data => !readArticleUrls.includes(data.url));
     unreadArticles.reverse();
@@ -159,7 +160,11 @@ const func = async ({ slackApp, firestoreDb, channel }: HourlyJobFunction) => {
         });
     }
     const articleUrls = news.articles.map(article => article.url);
-    await firestoreDb.collection('psi-slack').doc('psi-news-read-urls').set(articleUrls);
+    const newCache: Cache = {
+        psiNews: cache.psiNews,
+        facultyNews: articleUrls,
+    };
+    await firestoreDb.collection('psi-slack').doc('cache').set(newCache);
     return;
 };
 

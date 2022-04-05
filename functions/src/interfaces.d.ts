@@ -6,3 +6,8 @@ export interface HourlyJobFunction {
     firestoreDb: Firestore;
     channel: string;
 }
+
+export interface Cache {
+    psiNews: string[];
+    facultyNews: string[];
+}

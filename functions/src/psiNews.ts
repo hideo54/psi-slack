@@ -1,7 +1,7 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
 import slackify from 'slackify-html';
-import type { HourlyJobFunction } from './interfaces';
+import type { HourlyJobFunction, Cache } from './interfaces';
 
 const newsPageUrl = 'https://www.si.t.u-tokyo.ac.jp/student/news/';
 const auth = {
@@ -70,9 +70,10 @@ const textToSlackBlocks = (text: string) => {
 };
 
 const func = async ({ slackApp, firestoreDb, channel }: HourlyJobFunction) => {
-    const readUrls = (
-        await firestoreDb.collection('psi-slack').doc('psi-news-read-urls').get()
-    ).data() as string[];
+    const cache = (
+        await firestoreDb.collection('psi-slack').doc('cache').get()
+    ).data() as Cache;
+    const readUrls = cache.psiNews;
     console.log(readUrls);
     const news = await getUnreadNews(readUrls);
     news.reverse();
@@ -121,7 +122,11 @@ const func = async ({ slackApp, firestoreDb, channel }: HourlyJobFunction) => {
         );
     }
     readUrls.push(...news.map(notice => notice.url));
-    await firestoreDb.collection('psi-slack').doc('psi-news-read-urls').set(readUrls);
+    const newCache: Cache = {
+        psiNews: readUrls,
+        facultyNews: cache.facultyNews,
+    };
+    await firestoreDb.collection('psi-slack').doc('cache').set(newCache);
     return;
 };
 
