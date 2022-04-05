@@ -82,57 +82,56 @@ const textToSlackBlocks = (text: string) => {
 
 const func = async ({ channel }: { channel: string; }) => {
     const db = getFirestore();
-    // TODO: read readUrls from cache
-    const readUrls: string[] = [];
+    const readUrls = (
+        await db.collection('psi-slack').doc('psi-news-read-urls').get()
+    ).data() as string[];
     const news = await getUnreadNews(readUrls);
     news.reverse();
-    const notice = news[0];
-    // for (const notice of news) {
-    const headBlocks = [
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `<${newsPageUrl}|学科からのお知らせ>が更新されました。(カテゴリ: ${notice.category})`,
+    for (const notice of news) {
+        const headBlocks = [
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `<${newsPageUrl}|学科からのお知らせ>が更新されました。(カテゴリ: ${notice.category})`,
+                },
             },
-        },
-        {
-            type: 'context',
-            elements: [{
-                type: 'mrkdwn',
-                text: ':key: パスワードは `' + `${auth.username}:${auth.password}` + '` です。',
-            }],
-        },
-        { type: 'divider' },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `*<${notice.url}|${notice.title}>*`,
+            {
+                type: 'context',
+                elements: [{
+                    type: 'mrkdwn',
+                    text: ':key: パスワードは `' + `${auth.username}:${auth.password}` + '` です。',
+                }],
             },
-        },
-    ];
-    const bodyBlocks = textToSlackBlocks(notice.bodyForSlack);
-    const { ts } = await app.client.chat.postMessage({
-        channel,
-        icon_emoji: ':mega:',
-        username: '学科からのお知らせ',
-        text: `新しい「学科からのお知らせ」: *${notice.title}*`,
-        blocks: headBlocks,
-    });
-    await app.client.chat.postMessage(
-        {
+            { type: 'divider' },
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `*<${notice.url}|${notice.title}>*`,
+                },
+            },
+        ];
+        const bodyBlocks = textToSlackBlocks(notice.bodyForSlack);
+        const { ts } = await app.client.chat.postMessage({
             channel,
             icon_emoji: ':mega:',
             username: '学科からのお知らせ',
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
-            blocks: bodyBlocks,
-            thread_ts: ts,
-        }
-    );
-    // }
+            blocks: headBlocks,
+        });
+        await app.client.chat.postMessage(
+            {
+                channel,
+                icon_emoji: ':mega:',
+                username: '学科からのお知らせ',
+                text: `新しい「学科からのお知らせ」: *${notice.title}*`,
+                blocks: bodyBlocks,
+                thread_ts: ts,
+            }
+        );
+    }
     readUrls.push(...news.map(notice => notice.url));
-    // TODO: write readUrls to cache
     await db.collection('psi-slack').doc('psi-news-read-urls').set(readUrls);
     return;
 };
