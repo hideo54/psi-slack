@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import psiNews from './psiNews';
 import channelNotifier from './channelNotifier';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -10,9 +11,8 @@ export const psiSlackHourlyJob = functions
     .region('asia-northeast1')
     .pubsub.schedule('0 * * * *')
     .timeZone('Asia/Tokyo')
-    .onRun(() => {
-        console.log('Hello, world!');
-        return null;
+    .onRun(async () => {
+        await psiNews({ channel: botChannel });
     });
 
 export const psiSlackEventsReceiver = functions
