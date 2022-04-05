@@ -1,13 +1,13 @@
-import fs from 'fs/promises';
 import axios from 'axios';
 import cheerio from 'cheerio';
 import slackify from 'slackify-html';
-import type { WebAPICallResult } from '@slack/web-api';
-import { SlackClients, channelIds } from './lib/slack';
+import type { HourlyJobFunction, Cache } from './interfaces';
 
 const newsPageUrl = 'https://www.si.t.u-tokyo.ac.jp/student/news/';
 const auth = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     username: process.env.PSI_COMMON_USERNAME!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     password: process.env.PSI_COMMON_PASSWORD!,
 };
 
@@ -23,7 +23,7 @@ const getNewsBodyForSlack = async (pageUrl: string) => {
     const res = await axios.get(pageUrl, { auth });
     const html = res.data;
     const $ = cheerio.load(html);
-    const bodyForSlack = slackify($('div#newsbody').html()!).trim();
+    const bodyForSlack = slackify($('div#newsbody').html() || '').trim();
     return bodyForSlack;
 };
 
@@ -41,7 +41,8 @@ export const getUnreadNews = async (readUrls: string[]) => {
         new Object(e) as NoticeExcerpt
     );
     const unreadNoticeExcerptsForPSI = noticeExcerpts.filter(excerpt =>
-        ['共通', 'PSI', '未分類'].includes(excerpt.category) && !readUrls.includes(excerpt.url)
+        ['共通', 'PSI', '未分類'].includes(excerpt.category)
+        && !readUrls.includes(excerpt.url)
     );
     const unreadNotices: Notice[] = [];
     for (const excerpt of unreadNoticeExcerptsForPSI) {
@@ -61,17 +62,19 @@ const textToSlackBlocks = (text: string) => {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: text.slice(3000 * i, 3000 * (i+1)),
+                text: text.slice(3000 * i, 3000 * (i + 1)),
             },
         });
     }
     return blocks;
 };
 
-const main = async ({ webClient }: SlackClients) => {
-    const readUrls = JSON.parse(
-        await fs.readFile('cache/readUrls.json', 'utf-8')
-    ) as string[];
+const func = async ({ slackApp, firestoreDb, channel }: HourlyJobFunction) => {
+    const cache = (
+        await firestoreDb.collection('psi-slack').doc('cache').get()
+    ).data() as Cache;
+    const readUrls = cache.psiNews;
+    console.log(readUrls);
     const news = await getUnreadNews(readUrls);
     news.reverse();
     for (const notice of news) {
@@ -100,37 +103,31 @@ const main = async ({ webClient }: SlackClients) => {
             },
         ];
         const bodyBlocks = textToSlackBlocks(notice.bodyForSlack);
-        interface Result extends WebAPICallResult {
-            ts: string;
-        }
-        const { ts } = await webClient.chat.postMessage({
-            channel: channelIds.random,
+        const { ts } = await slackApp.client.chat.postMessage({
+            channel,
             icon_emoji: ':mega:',
             username: '学科からのお知らせ',
             text: `新しい「学科からのお知らせ」: *${notice.title}*`,
             blocks: headBlocks,
-        }) as Result;
-        try {
-            await webClient.chat.postMessage({
-                channel: channelIds.random,
+        });
+        await slackApp.client.chat.postMessage(
+            {
+                channel,
                 icon_emoji: ':mega:',
                 username: '学科からのお知らせ',
                 text: `新しい「学科からのお知らせ」: *${notice.title}*`,
                 blocks: bodyBlocks,
                 thread_ts: ts,
-            });
-        } catch (e) {
-            await webClient.chat.postMessage({
-                channel: channelIds.random,
-                icon_emoji: ':mega:',
-                username: '学科からのお知らせ',
-                text: `エラー:cry:\n${e}`,
-                thread_ts: ts,
-            });
-        }
+            }
+        );
     }
     readUrls.push(...news.map(notice => notice.url));
-    await fs.writeFile('cache/readUrls.json', JSON.stringify(readUrls));
+    const newCache: Cache = {
+        psiNews: readUrls,
+        facultyNews: cache.facultyNews,
+    };
+    await firestoreDb.collection('psi-slack').doc('cache').set(newCache);
+    return;
 };
 
-export default main;
+export default func;

@@ -16,7 +16,7 @@ oauth_config:
       - channels:read
 settings:
   event_subscriptions:
-    request_url: https://ayumu.hideo54.com/slack/events
+    request_url: https://asia-northeast1-hideo54.cloudfunctions.net/psiSlackEventsReceiver/slack/events
     bot_events:
       - channel_created
       - channel_unarchive

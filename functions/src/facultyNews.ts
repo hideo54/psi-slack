@@ -1,21 +1,23 @@
-import fs from 'fs/promises';
 import axios from 'axios';
 import iconv from 'iconv-lite';
 import { scrapeHTML } from 'scrape-it';
 import cheerio from 'cheerio';
 import slackify from 'slackify-html';
-import type { WebAPICallResult } from '@slack/web-api';
-import { SlackClients, channelIds } from './lib/slack';
+import type { HourlyJobFunction, Cache } from './interfaces';
 
 const host = 'https://info.t.u-tokyo.ac.jp';
 
 const getHtml = async (url: string) => {
     const proxy = {
         protocol: 'http',
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         host: process.env.FACULTY_PROXY_HOST!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         port: parseInt(process.env.FACULTY_PROXY_PORT!),
         auth: {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             username: process.env.FACULTY_PROXY_USERNAME!,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             password: process.env.FACULTY_PROXY_PASSWORD!,
         },
     };
@@ -89,17 +91,20 @@ const textToSlackBlocks = (text: string) => {
     return blocks;
 };
 
-const main = async ({ webClient }: SlackClients) => {
-    const readArticleUrls = JSON.parse(
-        await fs.readFile('cache/readFacultyArticleUrls.json', 'utf-8')
-    ) as string[];
+const func = async ({ slackApp, firestoreDb, channel }: HourlyJobFunction) => {
+    const cache = (
+        await firestoreDb.collection('psi-slack').doc('cache').get()
+    ).data() as Cache;
+    const readArticleUrls = cache.facultyNews;
     const news = await retrieveNews();
     const unreadArticles = news.articles.filter(data => !readArticleUrls.includes(data.url));
     unreadArticles.reverse();
     for (const article of unreadArticles) {
         const html = await getHtml(article.url);
         const htmlWithUrlReplaced = html.replace(/href="\/(.+?)"/gi, `href="${host}/$1"`);
-        const bodyForSlack = slackify(cheerio.load(htmlWithUrlReplaced)('pre').html()!).trim();
+        const bodyForSlack = slackify(
+            cheerio.load(htmlWithUrlReplaced)('pre').html() || ''
+        ).trim();
         const headBlocks = [
             {
                 type: 'section',
@@ -138,37 +143,29 @@ const main = async ({ webClient }: SlackClients) => {
             },
         ];
         const bodyBlocks = textToSlackBlocks(bodyForSlack);
-        interface Result extends WebAPICallResult {
-            ts: string;
-        }
-        const { ts } = await webClient.chat.postMessage({
-            channel: channelIds.facultyNews,
+        const { ts } = await slackApp.client.chat.postMessage({
+            channel,
             icon_emoji: ':mega:',
             username: '工学部新着情報',
             text: '工学部ポータルサイトの「新着情報」が更新されました。',
             blocks: headBlocks,
-        }) as Result;
-        try {
-            await webClient.chat.postMessage({
-                channel: channelIds.facultyNews,
-                icon_emoji: ':mega:',
-                username: '工学部新着情報',
-                text: '工学部ポータルサイトの「新着情報」が更新されました。',
-                blocks: bodyBlocks,
-                thread_ts: ts,
-            });
-        } catch (e) {
-            await webClient.chat.postMessage({
-                channel: channelIds.facultyNews,
-                icon_emoji: ':mega:',
-                username: '工学部新着情報',
-                text: `エラー:cry:\n${e}`,
-                thread_ts: ts,
-            });
-        }
+        });
+        await slackApp.client.chat.postMessage({
+            channel,
+            icon_emoji: ':mega:',
+            username: '工学部新着情報',
+            text: '工学部ポータルサイトの「新着情報」が更新されました。',
+            blocks: bodyBlocks,
+            thread_ts: ts,
+        });
     }
     const articleUrls = news.articles.map(article => article.url);
-    await fs.writeFile('cache/readFacultyArticleUrls.json', JSON.stringify(articleUrls));
+    const newCache: Cache = {
+        psiNews: cache.psiNews,
+        facultyNews: articleUrls,
+    };
+    await firestoreDb.collection('psi-slack').doc('cache').set(newCache);
+    return;
 };
 
-export default main;
+export default func;

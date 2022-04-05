@@ -4,7 +4,9 @@
 
 PSI 生からの pull request は積極的に受け付けます!
 
-## 機能
+## About
+
+`functions/` 以下のソースをもとに、毎時実行される `psiSlackHourlyJob` 関数と、Slack Events を受け取る `psiSlackEventsReceiver` 関数が Cloud Functions 上で動作します。
 
 ### psi-news
 
@@ -20,5 +22,6 @@ PSI 生からの pull request は積極的に受け付けます!
 
 ## setup
 
-* `cp sample.env .env` + よしなに
-* 構成は Manifest 参照。
+* `cd functions; cp sample.env .env` + よしなに
+* GitHub Actions による自動デプロイは……組んでないです……やりたいね
+* Slack App の構成は Manifest 参照。
