@@ -1,4 +1,5 @@
 import { App } from '@slack/bolt';
+import admin from 'firebase-admin';
 import axios from 'axios';
 import cheerio from 'cheerio';
 import slackify from 'slackify-html';
@@ -9,6 +10,8 @@ const app = new App({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     signingSecret: process.env.SLACK_SIGNING_SECRET!,
 });
+
+admin.initializeApp();
 
 const newsPageUrl = 'https://www.si.t.u-tokyo.ac.jp/student/news/';
 const auth = {
@@ -77,6 +80,7 @@ const textToSlackBlocks = (text: string) => {
 };
 
 const func = async ({ channel }: { channel: string; }) => {
+    const db = admin.database();
     // TODO: read readUrls from cache
     const readUrls: string[] = [];
     const news = await getUnreadNews(readUrls);
@@ -128,6 +132,7 @@ const func = async ({ channel }: { channel: string; }) => {
     // }
     readUrls.push(...news.map(notice => notice.url));
     // TODO: write readUrls to cache
+    await db.ref('psi-slack').child('psi-news-read-urls').set(readUrls);
 };
 
 export default func;
