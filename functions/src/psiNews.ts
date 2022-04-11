@@ -74,7 +74,6 @@ const func = async ({ slackApp, firestoreDb, channel }: HourlyJobFunction) => {
         await firestoreDb.collection('psi-slack').doc('cache').get()
     ).data() as Cache;
     const readUrls = cache.psiNews;
-    console.log(readUrls);
     const news = await getUnreadNews(readUrls);
     news.reverse();
     for (const notice of news) {
