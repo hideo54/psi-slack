@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { App } from '@slack/bolt';
 import dotenv from 'dotenv';
 dotenv.config();
-import psiNews from './psiNews';
+// import psiNews from './psiNews';
 import facultyNews from './facultyNews';
 import channelNotifier from './channelNotifier';
 
@@ -26,7 +26,7 @@ export const psiSlackHourlyJob = functions
         });
         admin.initializeApp();
         const firestoreDb = getFirestore();
-        await psiNews({ slackApp, firestoreDb, channel: randomChannel });
+        // await psiNews({ slackApp, firestoreDb, channel: randomChannel });
         await facultyNews({ slackApp, firestoreDb, channel: facultyNewsChannel });
     });
 

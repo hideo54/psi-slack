@@ -8,9 +8,9 @@ PSI 生からの pull request は積極的に受け付けます!
 
 `functions/` 以下のソースをもとに、毎時実行される `psiSlackHourlyJob` 関数と、Slack Events を受け取る `psiSlackEventsReceiver` 関数が Cloud Functions 上で動作します。
 
-### psi-news
+### ~~psi-news~~
 
-「学科からのお知らせ」の更新を取得し投稿します。
+~~「学科からのお知らせ」の更新を取得し投稿します。~~ 停止
 
 ### faculty-news
 
