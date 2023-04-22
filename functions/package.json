@@ -19,7 +19,7 @@
     "dotenv": "^16.0.0",
     "firebase-admin": "^11.4.1",
     "firebase-functions": "^3.24.1",
-    "scrape-it": "^5.3.2",
+    "scrape-it": "^6.0.1",
     "slackify-html": "^1.0.1"
   },
   "devDependencies": {
