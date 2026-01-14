@@ -17,7 +17,7 @@
     "@slack/bolt": "^3.17.0",
     "cheerio": "^1.0.0-rc.10",
     "dotenv": "^16.0.0",
-    "firebase-admin": "^11.4.1",
+    "firebase-admin": "^13.6.0",
     "firebase-functions": "^3.24.1",
     "scrape-it": "^6.0.1",
     "slackify-html": "^1.0.1"
